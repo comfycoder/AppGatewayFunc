@@ -18,6 +18,8 @@ namespace AppGatewayFunc
         [FunctionName("AppGatewayHttpTrigger")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "applicationgateways")] HttpRequest req,
+            [Queue("applicationgateways")] IAsyncCollector<ApplicationGatewayConfigModel> applicationGatewayQueue,
+            [Table("ApplicationGateways")] IAsyncCollector<ApplicationGateway> applicationGatewayTable,
             ILogger log)
         {
             if (log == null)
@@ -41,6 +43,38 @@ namespace AppGatewayFunc
             var agwafConfigMapper = new ApplicationGatewayConfigMapper();
 
             var agwafConfig = agwafConfigMapper.PopulateApplicationGatewayConfig(input);
+
+            try
+            {
+                await applicationGatewayQueue.AddAsync(agwafConfig);
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, "Unable to store data in storage queue.");
+                throw;
+            }
+
+            try
+            {
+
+                ApplicationGateway applicationGateway =
+                   new ApplicationGateway()
+                   {
+                       Id = input.Id,
+                       PartitionKey = "ApplicationGateway",
+                       RowKey = input.Id,
+                       Description = input.description,
+                       CreatedTime = DateTime.UtcNow,
+                       IsDeleted = false
+                   };
+
+                await applicationGatewayTable.AddAsync(applicationGateway);
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, "Unable to store data in storage table.");
+                throw;
+            }
 
             var builder = new ApplicationGatewayPropertiesBuilder(agwafConfig);
 
