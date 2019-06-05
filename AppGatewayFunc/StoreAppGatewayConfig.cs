@@ -9,15 +9,15 @@ using Newtonsoft.Json;
 
 namespace AppGatewayFunc
 {
-    public static class GenerateAppGatewayParameters
+    public static class StoreAppGatewayConfig
     {
-        [FunctionName("GenerateAppGatewayParameters")]
+        [FunctionName("StoreAppGatewayConfig")]
         public static async Task Run(
             [QueueTrigger("applicationgateways", Connection = "AzureWebJobsStorage")]ApplicationGatewayConfigModel appGatewayConfig,
             IBinder binder,
             ILogger log)
         {
-            log.LogInformation($"C# Queue trigger function processed: {appGatewayConfig.description}");
+            log.LogInformation($"Store Application Gateway Config file: {appGatewayConfig.description}");
 
             var outputBlob = await binder.BindAsync<TextWriter>(
                 new BlobAttribute($"application-gateways/{appGatewayConfig.Id}.json")
