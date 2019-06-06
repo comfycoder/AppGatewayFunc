@@ -131,7 +131,7 @@ namespace AppGatewayFunc.Models
                 this.unhealthyThreshold = 3;
                 this.pickHostNameFromBackendAddress = true;
                 this.minServers = 0;
-                this.matchStatusCodes = "200-399";
+                this.matchStatusCodes = "200-399,404";
             }
         }
 
@@ -151,7 +151,7 @@ namespace AppGatewayFunc.Models
                 this.frontendPortName = "appGatewayFrontendPort80";
                 this.hostName = "";
                 this.protocol = "Http";
-                this.requireServerNameIndication = true;
+                this.requireServerNameIndication = false;
             }
         }
 
@@ -298,7 +298,7 @@ namespace AppGatewayFunc.Models
             public PublicIPAddressModel publicIPAddress { get; set; }
             public List<SslCertificateModel> sslCertificates { get; set; }
 
-                                  
+
 
             public ApplicationGatewayConfigModel()
             {
@@ -317,5 +317,4 @@ namespace AppGatewayFunc.Models
             public ApplicationGatewayConfigModel applicationGatewayConfig { get; set; }
         }
     }
-
 }

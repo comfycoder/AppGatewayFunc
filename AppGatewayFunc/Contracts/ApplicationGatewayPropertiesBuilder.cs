@@ -115,8 +115,8 @@ namespace GatewayConfigGenerator.Contracts
 
         public void SetProbe(ProbeModel probeModel)
         {
-            var newProbe = new Probe(probeModel.probeName, probeModel.protocol, probeModel.path, 
-                probeModel.interval, probeModel.timeout, probeModel.unhealthyThreshold, 
+            var newProbe = new Probe(probeModel.probeName, probeModel.protocol, probeModel.path,
+                probeModel.interval, probeModel.timeout, probeModel.unhealthyThreshold,
                 probeModel.pickHostNameFromBackendAddress, probeModel.matchStatusCodes);
 
             _builder.probes.Add(newProbe);
@@ -126,19 +126,21 @@ namespace GatewayConfigGenerator.Contracts
         {
             var probeId = $"{_applicationGatewayId}/probes/{httpSettings.probeName}";
 
-            var newBackendHttpSettings = new BackendHttpSettings(httpSettings.httpsSettingsName, 
-                httpSettings.port, httpSettings.protocol, httpSettings.cookieBasedAffinity, 
-                httpSettings.pickHostNameFromBackendAddress, httpSettings.requestTimeout, probeId);
+            var newBackendHttpSettings = new BackendHttpSettings(httpSettings.httpsSettingsName,
+                httpSettings.port, httpSettings.protocol, httpSettings.cookieBasedAffinity,
+                httpSettings.pickHostNameFromBackendAddress, httpSettings.path, httpSettings.requestTimeout, probeId);
 
             _builder.backendHttpSettingsCollection.Add(newBackendHttpSettings);
         }
 
         public void SetHttpListener(HttpListenerModel httpListener)
         {
+            var frontendIPConfigurationId = $"{_applicationGatewayId}/frontendIPConfigurations/{httpListener.frontendIPConfigurationName}";
+
             var frontendPortId = $"{_applicationGatewayId}/frontendPorts/{httpListener.frontendPortName}";
 
-            var newHttpListener = new HttpListener(httpListener.httpListenerName, _publicIPAddressId,
-                frontendPortId, httpListener.protocol, httpListener.hostName, 
+            var newHttpListener = new HttpListener(httpListener.httpListenerName, frontendIPConfigurationId,
+                frontendPortId, httpListener.protocol, httpListener.hostName,
                 httpListener.requireServerNameIndication, null);
 
             _builder.httpListeners.Add(newHttpListener);
@@ -146,11 +148,13 @@ namespace GatewayConfigGenerator.Contracts
 
         public void SetHttpsListener(HttpsListenerModel httpsListener)
         {
+            var frontendIPConfigurationId = $"{_applicationGatewayId}/frontendIPConfigurations/{httpsListener.frontendIPConfigurationName}";
+
             var frontendPortId = $"{_applicationGatewayId}/frontendPorts/{httpsListener.frontendPortName}";
 
             var sslCertificateId = $"{_applicationGatewayId}/sslCertificates/{httpsListener.sslCertificateName}";
 
-            var newHttpListener = new HttpListener(httpsListener.httpsListenerName, _publicIPAddressId,
+            var newHttpListener = new HttpListener(httpsListener.httpsListenerName, frontendIPConfigurationId,
                 frontendPortId, httpsListener.protocol, httpsListener.hostName,
                 httpsListener.requireServerNameIndication, sslCertificateId);
 
@@ -191,13 +195,6 @@ namespace GatewayConfigGenerator.Contracts
 
             foreach (var backendPath in httpsRule.backendPaths)
             {
-                //var path = $"/{backendPath.path}/*";
-
-                //if (backendPath.pathName.ToLower() == "root")
-                //{
-                //    path = "/*";
-                //}
-
                 var backendAddressPoolId = $"{_applicationGatewayId}/backendAddressPools/{backendPath.backendPoolName}";
 
                 var backendHttpSettingsId = $"{_applicationGatewayId}/backendHttpSettingsCollection/{backendPath.httpsSettingsName}";
@@ -218,7 +215,7 @@ namespace GatewayConfigGenerator.Contracts
 
             newRequestRoutingRule.properties.httpListener = new HttpListenerId(httpListenerId);
 
-            var redirectConfigurationId = $"{_applicationGatewayId}/urlPathMaps/{httpToHttpsRule.httpToHttpsRuleName}";
+            var redirectConfigurationId = $"{_applicationGatewayId}/redirectConfigurations/{httpToHttpsRule.httpToHttpsRuleName}";
 
             newRequestRoutingRule.properties.redirectConfiguration = new RedirectConfigurationId(redirectConfigurationId);
 

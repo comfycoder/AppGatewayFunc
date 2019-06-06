@@ -12,20 +12,16 @@ namespace GatewayConfigGenerator.Contracts
 
         public string tier { get; set; }
 
-        public int capacity { get; set; }
-
         public Sku()
         {
             this.name = "Waf_v2";
             this.tier = "Waf_v2";
-            this.capacity = 2;
         }
 
-        public Sku(string name, string tier, int capacity)
+        public Sku(string name, string tier)
         {
             this.name = name;
             this.tier = tier;
-            this.capacity = capacity;
         }
     }
 
@@ -235,17 +231,20 @@ namespace GatewayConfigGenerator.Contracts
 
         public bool pickHostNameFromBackendAddress { get; set; }
 
+        public string path { get; set; }
+
         public int requestTimeout { get; set; }
 
         public ProbeId probe { get; set; }
 
         public BackendHttpSettingsProperties(int port, string protocol, string cookieBasedAffinity,
-            bool pickHostNameFromBackendAddress, int requestTimeout, string probeId)
+            bool pickHostNameFromBackendAddress, string path, int requestTimeout, string probeId)
         {
             this.Port = port;
             this.Protocol = protocol;
             this.CookieBasedAffinity = cookieBasedAffinity;
             this.pickHostNameFromBackendAddress = pickHostNameFromBackendAddress;
+            this.path = path;
             this.requestTimeout = requestTimeout;
             this.probe = new ProbeId(probeId);
         }
@@ -258,11 +257,11 @@ namespace GatewayConfigGenerator.Contracts
         public BackendHttpSettingsProperties properties { get; set; }
 
         public BackendHttpSettings(string name, int port, string protocol, string cookieBasedAffinity,
-            bool pickHostNameFromBackendAddress, int requestTimeout, string probeId)
+            bool pickHostNameFromBackendAddress, string path, int requestTimeout, string probeId)
         {
             this.name = name;
-            this.properties = new BackendHttpSettingsProperties(port, protocol, 
-                cookieBasedAffinity, pickHostNameFromBackendAddress, requestTimeout, probeId);
+            this.properties = new BackendHttpSettingsProperties(port, protocol,
+                cookieBasedAffinity, pickHostNameFromBackendAddress, path, requestTimeout, probeId);
         }
     }
 
@@ -310,7 +309,8 @@ namespace GatewayConfigGenerator.Contracts
 
         public bool requireServerNameIndication { get; set; }
 
-        public SslCertificateId sslCertificateId { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public SslCertificateId sslCertificate { get; set; }
 
         public HttpListenerProperties(string frontendIPConfigurationId, string frontendPortId,
             string protocol, string hostName, bool requireServerNameIndication, string sslCertificateId = null)
@@ -322,7 +322,7 @@ namespace GatewayConfigGenerator.Contracts
             this.requireServerNameIndication = requireServerNameIndication;
             if (!string.IsNullOrWhiteSpace(sslCertificateId))
             {
-                this.sslCertificateId = new SslCertificateId(sslCertificateId);
+                this.sslCertificate = new SslCertificateId(sslCertificateId);
             }
         }
     }
@@ -418,7 +418,7 @@ namespace GatewayConfigGenerator.Contracts
 
         public PathRuleProperties properties { get; set; }
 
-        public PathRule(string name, string paths, string backendAddressPoolId, 
+        public PathRule(string name, string paths, string backendAddressPoolId,
             string backendHttpSettingsId)
         {
             this.name = name;
@@ -490,7 +490,7 @@ namespace GatewayConfigGenerator.Contracts
             this.id = id;
         }
     }
-    
+
     public class RequestRoutingRuleProperties
     {
         public string RuleType { get; set; }
@@ -540,7 +540,7 @@ namespace GatewayConfigGenerator.Contracts
             foreach (string item in arrStatusCodes)
             {
                 this.statusCodes.Add(item);
-            }            
+            }
         }
     }
 
@@ -625,7 +625,7 @@ namespace GatewayConfigGenerator.Contracts
 
         public List<RequestRoutingRuleId> requestRoutingRules { get; set; }
 
-        public RedirectConfigurationProperties(string redirectType, string targetListenerId, 
+        public RedirectConfigurationProperties(string redirectType, string targetListenerId,
             string requestRoutingRuleId, bool includePath, bool includeQueryString)
         {
             this.redirectType = redirectType;
@@ -648,7 +648,7 @@ namespace GatewayConfigGenerator.Contracts
         {
             this.name = name;
 
-            this.properties = new RedirectConfigurationProperties(redirectType, targetListenerId, 
+            this.properties = new RedirectConfigurationProperties(redirectType, targetListenerId,
                 requestRoutingRuleId, includePath, includeQueryString);
         }
     }
@@ -797,5 +797,4 @@ namespace GatewayConfigGenerator.Contracts
             this.properties = new ApplicationGatewayProperties();
         }
     }
-
 }
